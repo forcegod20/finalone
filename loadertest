@@ -1,3 +1,4 @@
+return function()
 -- Zynx Syndicate Main Loader
 -- Combines: Webhook, Half Loading Screen, Full Loading Screen, CMD Line
 -- For Delta Executor
@@ -304,7 +305,7 @@ end)
 -- Make main loader accessible globally
 _G.MainLoader = MainLoader
 _G.ZynxCMD = MainLoader.cmdInterface()
-
+end
 print("🎯 Zynx Syndicate Main Loader Script Loaded!")
 print("💡 Use ZynxCMD to access command functions")
 print("💡 Auto-starting in 2 seconds...")
