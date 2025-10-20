@@ -1,3 +1,4 @@
+return function()
 -- Zynx Hub - Complete Trading System (Fixed Trade Commands)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -757,4 +758,6 @@ if TextChatService and TextChatService.TextChannels then
             end
         end
     end
+end
+
 end
