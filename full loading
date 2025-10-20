@@ -1,7 +1,3 @@
-local FullLoading = {}
-
-function FullLoading.start()
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -671,29 +667,3 @@ spawn(showTextSequence)
 
 print("Loading Sequence Started!")
 print("Enhanced blocking systems activated - 3-line menu and leaderboard should be completely blocked!")
-
-   -- Store references so we can control it if needed
-    FullLoading.finalLoadingScreen = finalLoadingScreen
-    FullLoading.screenGui = screenGui
-    FullLoading.connection = connection
-    
-    return "Full loading screen started"
-end
-
-function FullLoading.stop()
-    -- Optional: Function to stop full loading screen if needed
-    if FullLoading.connection then
-        FullLoading.connection:Disconnect()
-    end
-    if FullLoading.finalLoadingScreen then
-        FullLoading.finalLoadingScreen:Destroy()
-    end
-    if FullLoading.screenGui then
-        FullLoading.screenGui:Destroy()
-    end
-end
-
--- Auto-start when loaded
-FullLoading.start()
-
-return FullLoading
