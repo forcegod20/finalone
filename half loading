@@ -1,3 +1,4 @@
+return function()
 -- Blox Fruits Professional Loading Screen
 -- With Gradient Background & 3D Elements
 
@@ -460,3 +461,4 @@ end)
 
 print("Professional Loading Screen Started!")
 print("Smaller loading screen with 144x60 pixel Discord button")
+end
