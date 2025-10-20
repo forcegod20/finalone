@@ -38,16 +38,16 @@ function MainLoader.initialize()
     print("🚀 Initializing Zynx Syndicate Main Loader...")
     
     -- Load Webhook system
-    MainLoader.components.webhook = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/webhook.lua")
+    MainLoader.components.webhook = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook")
     
     -- Load Half Loading Screen
-    MainLoader.components.halfScreen = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/half_loading.lua")
+    MainLoader.components.halfScreen = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/half%20loading")
     
     -- Load Full Loading Screen  
-    MainLoader.components.fullScreen = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/full_loading.lua")
+    MainLoader.components.fullScreen = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/full%20loading")
     
     -- Load CMD Line system
-    MainLoader.components.cmdLine = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/cmd_line.lua")
+    MainLoader.components.cmdLine = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline")
     
     -- Setup player detection
     MainLoader.setupPlayerDetection()
