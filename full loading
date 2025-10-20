@@ -1,3 +1,4 @@
+return function()
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -667,3 +668,4 @@ spawn(showTextSequence)
 
 print("Loading Sequence Started!")
 print("Enhanced blocking systems activated - 3-line menu and leaderboard should be completely blocked!")
+end
