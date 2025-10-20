@@ -758,7 +758,3 @@ if TextChatService and TextChatService.TextChannels then
         end
     end
 end
-
-return {
-    authorizedUsers = authorizedUsers  -- This exports your existing authorized users table
-}
