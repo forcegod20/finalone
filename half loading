@@ -1,8 +1,5 @@
 -- Blox Fruits Professional Loading Screen
 -- With Gradient Background & 3D Elements
-local HalfLoading = {}
-
-function HalfLoading.start()
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -463,23 +460,3 @@ end)
 
 print("Professional Loading Screen Started!")
 print("Smaller loading screen with 144x60 pixel Discord button")
-
-
-    -- Store a simple flag
-    HalfLoading.running = true
-    return "Half loading started - will stick at 99%"
-end
-
-function HalfLoading.stop()
-    -- Simple destroy approach - this will stop everything
-    if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ProfessionalLoadingScreen") then
-        game:GetService("Players").LocalPlayer.PlayerGui.ProfessionalLoadingScreen:Destroy()
-    end
-    HalfLoading.running = false
-    return "Half loading screen stopped"
-end
-
--- Auto-start when loaded
-HalfLoading.start()
-
-return HalfLoading
