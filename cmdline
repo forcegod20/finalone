@@ -626,7 +626,7 @@ local commands = {
         return nil
     end,
     
-    -- ===== FIXED RESETFRUIT COMMAND (SILENT VERSION) =====
+    -- ===== FIXED RESETFRUIT COMMAND (WORKING VERSION) =====
     resetfruit = function(fruitName)
         if not fruitName then return nil end -- Silent return
         
@@ -636,11 +636,8 @@ local commands = {
             return nil -- Silent return
         end
         
-        -- Format the fruit name correctly for the remote
-        local formattedName = formatItemName(exactName)
-        
         local unstoreSuccess = pcall(function()
-            return Remote:InvokeServer("LoadFruit", formattedName)
+            return Remote:InvokeServer("LoadFruit", exactName)
         end)
         
         -- Step 2: Reset character after 1 second
