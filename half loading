@@ -1,0 +1,485 @@
+-- Blox Fruits Professional Loading Screen
+-- With Gradient Background & 3D Elements
+local HalfLoading = {}
+
+function HalfLoading.start()
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local loadingScreen = Instance.new("ScreenGui")
+loadingScreen.Name = "ProfessionalLoadingScreen"
+loadingScreen.Parent = playerGui
+loadingScreen.ResetOnSpawn = false
+
+-- Main container with gradient effect - MADE SMALLER
+local mainContainer = Instance.new("Frame")
+mainContainer.Size = UDim2.new(0.7, 0, 0.6, 0)  -- Smaller container
+mainContainer.Position = UDim2.new(0.15, 0, 0.2, 0)  -- Adjusted position for smaller container
+mainContainer.BackgroundColor3 = Color3.fromRGB(10, 15, 20)
+mainContainer.BorderSizePixel = 0
+mainContainer.Parent = loadingScreen
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0.03, 0)
+mainCorner.Parent = mainContainer
+
+-- Create gradient layers
+local gradientLayers = {
+    {color = Color3.fromRGB(5, 10, 15), size = 1.0, position = 0.0},
+    {color = Color3.fromRGB(15, 20, 25), size = 0.9, position = 0.05},
+    {color = Color3.fromRGB(25, 30, 35), size = 0.8, position = 0.1},
+    {color = Color3.fromRGB(35, 40, 45), size = 0.7, position = 0.15}
+}
+
+for i, layer in ipairs(gradientLayers) do
+    local gradientLayer = Instance.new("Frame")
+    gradientLayer.Size = UDim2.new(layer.size, 0, layer.size, 0)
+    gradientLayer.Position = UDim2.new(layer.position, 0, layer.position, 0)
+    gradientLayer.BackgroundColor3 = layer.color
+    gradientLayer.BorderSizePixel = 0
+    gradientLayer.ZIndex = 0
+    gradientLayer.Parent = mainContainer
+    
+    local layerCorner = Instance.new("UICorner")
+    layerCorner.CornerRadius = UDim.new(0.03, 0)
+    layerCorner.Parent = gradientLayer
+end
+
+-- Header section
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0.15, 0)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(8, 12, 18)
+header.BackgroundTransparency = 0.3
+header.BorderSizePixel = 0
+header.ZIndex = 2
+header.Parent = mainContainer
+
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0.03, 0)
+headerCorner.Parent = header
+
+-- Header accent line
+local headerAccent = Instance.new("Frame")
+headerAccent.Size = UDim2.new(1, 0, 0.015, 0)
+headerAccent.Position = UDim2.new(0, 0, 0.98, 0)
+headerAccent.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+headerAccent.BorderSizePixel = 0
+headerAccent.ZIndex = 3
+headerAccent.Parent = header
+
+-- Main title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.6, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "BLOX FRUITS"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBlack
+title.TextStrokeTransparency = 0.8
+title.TextStrokeColor3 = Color3.fromRGB(0, 100, 200)
+title.ZIndex = 3
+title.Parent = header
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, 0, 0.4, 0)
+subtitle.Position = UDim2.new(0, 0, 0.6, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "SYSTEM INITIALIZATION"
+subtitle.TextColor3 = Color3.fromRGB(200, 200, 255)
+subtitle.TextScaled = true
+subtitle.Font = Enum.Font.Gotham
+subtitle.ZIndex = 3
+subtitle.Parent = header
+
+-- Status display
+local statusContainer = Instance.new("Frame")
+statusContainer.Size = UDim2.new(0.9, 0, 0.1, 0)
+statusContainer.Position = UDim2.new(0.05, 0, 0.17, 0)
+statusContainer.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+statusContainer.BackgroundTransparency = 0.3
+statusContainer.BorderSizePixel = 0
+statusContainer.ZIndex = 2
+statusContainer.Parent = mainContainer
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0.02, 0)
+statusCorner.Parent = statusContainer
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(0.25, 0, 1, 0)
+statusLabel.Position = UDim2.new(0.02, 0, 0, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status:"
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusLabel.TextScaled = true
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.ZIndex = 3
+statusLabel.Parent = statusContainer
+
+local statusValue = Instance.new("TextLabel")
+statusValue.Size = UDim2.new(0.7, 0, 1, 0)
+statusValue.Position = UDim2.new(0.27, 0, 0, 0)
+statusValue.BackgroundTransparency = 1
+statusValue.Text = "Initializing core modules..."
+statusValue.TextColor3 = Color3.fromRGB(0, 200, 255)
+statusValue.TextScaled = true
+statusValue.TextXAlignment = Enum.TextXAlignment.Left
+statusValue.Font = Enum.Font.GothamBold
+statusValue.ZIndex = 3
+statusValue.Parent = statusContainer
+
+-- Loading Bar Container
+local loadingBarContainer = Instance.new("Frame")
+loadingBarContainer.Size = UDim2.new(0.9, 0, 0.1, 0)
+loadingBarContainer.Position = UDim2.new(0.05, 0, 0.3, 0)
+loadingBarContainer.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+loadingBarContainer.BackgroundTransparency = 0.3
+loadingBarContainer.BorderSizePixel = 0
+loadingBarContainer.ZIndex = 2
+loadingBarContainer.Parent = mainContainer
+
+local loadingBarCorner = Instance.new("UICorner")
+loadingBarCorner.CornerRadius = UDim.new(0.02, 0)
+loadingBarCorner.Parent = loadingBarContainer
+
+-- Loading bar background
+local loadingBarBg = Instance.new("Frame")
+loadingBarBg.Size = UDim2.new(0.95, 0, 0.5, 0)
+loadingBarBg.Position = UDim2.new(0.025, 0, 0.25, 0)
+loadingBarBg.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+loadingBarBg.BorderSizePixel = 0
+loadingBarBg.ZIndex = 2
+loadingBarBg.Parent = loadingBarContainer
+
+local loadingBgCorner = Instance.new("UICorner")
+loadingBgCorner.CornerRadius = UDim.new(0.08, 0)
+loadingBgCorner.Parent = loadingBarBg
+
+-- Loading bar fill
+local loadingBar = Instance.new("Frame")
+loadingBar.Size = UDim2.new(0, 0, 1, 0)
+loadingBar.Position = UDim2.new(0, 0, 0, 0)
+loadingBar.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+loadingBar.BorderSizePixel = 0
+loadingBar.ZIndex = 3
+loadingBar.Parent = loadingBarBg
+
+local loadingBarFillCorner = Instance.new("UICorner")
+loadingBarFillCorner.CornerRadius = UDim.new(0.08, 0)
+loadingBarFillCorner.Parent = loadingBar
+
+-- Loading bar highlight
+local loadingBarHighlight = Instance.new("Frame")
+loadingBarHighlight.Size = UDim2.new(1, 0, 0.3, 0)
+loadingBarHighlight.Position = UDim2.new(0, 0, 0, 0)
+loadingBarHighlight.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+loadingBarHighlight.BackgroundTransparency = 0.5
+loadingBarHighlight.BorderSizePixel = 0
+loadingBarHighlight.ZIndex = 4
+loadingBarHighlight.Parent = loadingBar
+
+local highlightCorner = Instance.new("UICorner")
+highlightCorner.CornerRadius = UDim.new(0.08, 0)
+highlightCorner.Parent = loadingBarHighlight
+
+-- Loading bar shine effect
+local loadingBarShine = Instance.new("Frame")
+loadingBarShine.Size = UDim2.new(0.2, 0, 1, 0)
+loadingBarShine.Position = UDim2.new(-0.2, 0, 0, 0)
+loadingBarShine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+loadingBarShine.BackgroundTransparency = 0.7
+loadingBarShine.BorderSizePixel = 0
+loadingBarShine.ZIndex = 4
+loadingBarShine.Parent = loadingBar
+
+local shineCorner = Instance.new("UICorner")
+shineCorner.CornerRadius = UDim.new(0.08, 0)
+shineCorner.Parent = loadingBarShine
+
+-- Percentage display
+local percentText = Instance.new("TextLabel")
+percentText.Size = UDim2.new(1, 0, 0.4, 0)
+percentText.Position = UDim2.new(0, 0, 0.55, 0)
+percentText.BackgroundTransparency = 1
+percentText.Text = "0%"
+percentText.TextColor3 = Color3.fromRGB(255, 255, 255)
+percentText.TextScaled = true
+percentText.Font = Enum.Font.GothamBlack
+percentText.ZIndex = 3
+percentText.Parent = loadingBarContainer
+
+-- Technical details container
+local techContainer = Instance.new("Frame")
+techContainer.Size = UDim2.new(0.9, 0, 0.35, 0)
+techContainer.Position = UDim2.new(0.05, 0, 0.42, 0)
+techContainer.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+techContainer.BackgroundTransparency = 0.3
+techContainer.BorderSizePixel = 0
+techContainer.ZIndex = 2
+techContainer.Parent = mainContainer
+
+local techCorner = Instance.new("UICorner")
+techCorner.CornerRadius = UDim.new(0.02, 0)
+techCorner.Parent = techContainer
+
+-- Technical details title
+local techTitle = Instance.new("TextLabel")
+techTitle.Size = UDim2.new(1, 0, 0.15, 0)
+techTitle.Position = UDim2.new(0, 0, 0, 0)
+techTitle.BackgroundTransparency = 1
+techTitle.Text = "SYSTEM LOG"
+techTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+techTitle.TextScaled = true
+techTitle.Font = Enum.Font.GothamBold
+techTitle.ZIndex = 3
+techTitle.Parent = techContainer
+
+-- Technical log display
+local techLog = Instance.new("TextLabel")
+techLog.Size = UDim2.new(0.95, 0, 0.8, 0)
+techLog.Position = UDim2.new(0.025, 0, 0.15, 0)
+techLog.BackgroundTransparency = 1
+techLog.Text = "> Initializing system components..."
+techLog.TextColor3 = Color3.fromRGB(0, 255, 150)
+techLog.TextXAlignment = Enum.TextXAlignment.Left
+techLog.TextYAlignment = Enum.TextYAlignment.Top
+techLog.TextSize = 14
+techLog.Font = Enum.Font.Code
+techLog.TextWrapped = true
+techLog.ZIndex = 3
+techLog.Parent = techContainer
+
+-- Discord button container
+local discordContainer = Instance.new("Frame")
+discordContainer.Size = UDim2.new(0.9, 0, 0.08, 0)
+discordContainer.Position = UDim2.new(0.05, 0, 0.79, 0)
+discordContainer.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+discordContainer.BackgroundTransparency = 0.3
+discordContainer.BorderSizePixel = 0
+discordContainer.ZIndex = 2
+discordContainer.Parent = mainContainer
+
+local discordCorner = Instance.new("UICorner")
+discordCorner.CornerRadius = UDim.new(0.02, 0)
+discordCorner.Parent = discordContainer
+
+-- Discord button - EXACTLY 144x60 pixels
+local discordButton = Instance.new("TextButton")
+discordButton.Size = UDim2.new(0, 144, 0, 60)  -- EXACTLY 144x60 pixels
+discordButton.AnchorPoint = Vector2.new(0.5, 0.5)  -- Center anchor
+discordButton.Position = UDim2.new(0.5, 0, 0.5, 0)  -- Centered position
+discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)  -- Discord blurple
+discordButton.Text = "COPY DISCORD INVITE"
+discordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+discordButton.TextScaled = true
+discordButton.Font = Enum.Font.GothamBold
+discordButton.AutoButtonColor = false
+discordButton.ZIndex = 3
+discordButton.Parent = discordContainer
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0.08, 0)
+buttonCorner.Parent = discordButton
+
+-- 3D Button shadow
+local buttonShadow = Instance.new("Frame")
+buttonShadow.Size = UDim2.new(1, 4, 1, 4)
+buttonShadow.Position = UDim2.new(0, -2, 0, 2)
+buttonShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+buttonShadow.BackgroundTransparency = 0.7
+buttonShadow.BorderSizePixel = 0
+buttonShadow.ZIndex = 2
+buttonShadow.Parent = discordButton
+
+local shadowCorner = Instance.new("UICorner")
+shadowCorner.CornerRadius = UDim.new(0.1, 0)
+shadowCorner.Parent = buttonShadow
+
+-- Button highlight
+local buttonHighlight = Instance.new("Frame")
+buttonHighlight.Size = UDim2.new(1, 0, 0.3, 0)
+buttonHighlight.Position = UDim2.new(0, 0, 0, 0)
+buttonHighlight.BackgroundColor3 = Color3.fromRGB(150, 170, 255)
+buttonHighlight.BackgroundTransparency = 0.3
+buttonHighlight.BorderSizePixel = 0
+buttonHighlight.ZIndex = 4
+buttonHighlight.Parent = discordButton
+
+local highlightBtnCorner = Instance.new("UICorner")
+highlightBtnCorner.CornerRadius = UDim.new(0.08, 0)
+highlightBtnCorner.Parent = buttonHighlight
+
+-- Button hover effects
+discordButton.MouseEnter:Connect(function()
+    discordButton.BackgroundColor3 = Color3.fromRGB(105, 120, 255)
+    buttonHighlight.BackgroundTransparency = 0.2
+    -- 3D effect
+    discordButton.Position = UDim2.new(0.5, 0, 0.5, 2)
+    buttonShadow.Position = UDim2.new(0, -1, 0, 1)
+end)
+
+discordButton.MouseLeave:Connect(function()
+    discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    buttonHighlight.BackgroundTransparency = 0.3
+    -- Reset 3D effect
+    discordButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+    buttonShadow.Position = UDim2.new(0, -2, 0, 2)
+end)
+
+discordButton.MouseButton1Down:Connect(function()
+    -- Click effect
+    discordButton.Position = UDim2.new(0.5, 0, 0.5, 4)
+    buttonShadow.Position = UDim2.new(0, 0, 0, 0)
+end)
+
+discordButton.MouseButton1Up:Connect(function()
+    discordButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+    buttonShadow.Position = UDim2.new(0, -2, 0, 2)
+end)
+
+discordButton.MouseButton1Click:Connect(function()
+    pcall(function()
+        setclipboard("https://discord.gg/UJt7y7pt95")
+    end)
+    
+    local originalText = discordButton.Text
+    local originalColor = discordButton.BackgroundColor3
+    
+    discordButton.Text = "INVITE COPIED!"
+    discordButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    buttonHighlight.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+    
+    wait(1.5)
+    
+    discordButton.Text = originalText
+    discordButton.BackgroundColor3 = originalColor
+    buttonHighlight.BackgroundColor3 = Color3.fromRGB(150, 170, 255)
+end)
+
+-- Technical messages
+local technicalMessages = {
+    "> Initializing system components...",
+    "> Loading core game modules...",
+    "> Establishing secure connection...",
+    "> Fetching player data from servers...",
+    "> Analyzing game environment...",
+    "> Compiling script resources...",
+    "> Loading asset packages...",
+    "> Initializing security protocols...",
+    "> Setting up game interfaces...",
+    "> Preparing world data...",
+    "> Loading character models...",
+    "> Initializing physics engine...",
+    "> Setting up network layers...",
+    "> Compiling UI components...",
+    "> Loading sound assets...",
+    "> Initializing game mechanics...",
+    "> Preparing spawn locations...",
+    "> Loading game maps...",
+    "> Setting up player controls...",
+    "> Finalizing system checks...",
+    "> System ready for launch..."
+}
+
+local statusUpdates = {
+    "Initializing core modules...",
+    "Loading game resources...",
+    "Establishing connections...",
+    "Compiling scripts...",
+    "Setting up environment...",
+    "Finalizing systems...",
+    "Ready to launch!"
+}
+
+-- Loading animation
+local progress = 0
+local connection
+local startTime = tick()
+local currentMessageIndex = 1
+local messageTimer = 0
+local totalLoadTime = 240 -- 4 minutes
+
+connection = RunService.Heartbeat:Connect(function(deltaTime)
+    local currentTime = tick() - startTime
+    
+    -- Update progress over 4 minutes
+    if progress < 100 then
+        progress = progress + (deltaTime * (100 / totalLoadTime))
+        if progress > 100 then
+            progress = 100
+        end
+    end
+    
+    -- Update loading bar with smooth animation
+    loadingBar.Size = UDim2.new(progress/100, 0, 1, 0)
+    percentText.Text = string.format("%d%%", math.floor(progress))
+    
+    -- Animate loading bar shine
+    loadingBarShine.Position = UDim2.new((math.sin(currentTime * 3) + 1) * 0.4, 0, 0, 0)
+    
+    -- Update status text
+    local statusIndex = math.floor((progress / 100) * #statusUpdates) + 1
+    if statusIndex > #statusUpdates then statusIndex = #statusUpdates end
+    statusValue.Text = statusUpdates[statusIndex]
+    
+    -- Update technical log (every 0.8 seconds)
+    messageTimer = messageTimer + deltaTime
+    if messageTimer > 0.8 and currentMessageIndex <= #technicalMessages then
+        -- Show last 4 messages for context
+        local messagesToShow = ""
+        local startIndex = math.max(1, currentMessageIndex - 3)
+        for i = startIndex, currentMessageIndex do
+            if i <= #technicalMessages then
+                messagesToShow = messagesToShow .. technicalMessages[i] .. "\n"
+            end
+        end
+        techLog.Text = messagesToShow
+        
+        currentMessageIndex = currentMessageIndex + 1
+        if currentMessageIndex > #technicalMessages then
+            currentMessageIndex = 1  -- Loop back to start
+        end
+        messageTimer = 0
+    end
+    
+    -- Pulsing header accent
+    local accentPulse = math.sin(currentTime * 1.5) * 0.2 + 0.8
+    headerAccent.BackgroundColor3 = Color3.fromRGB(0, 150 * accentPulse, 255 * accentPulse)
+    
+    -- Animate button highlight
+    local buttonPulse = math.sin(currentTime * 2) * 0.1 + 0.2
+    buttonHighlight.BackgroundTransparency = 0.3 - buttonPulse
+end)
+
+print("Professional Loading Screen Started!")
+print("Smaller loading screen with 144x60 pixel Discord button")
+
+
+    -- Store a simple flag
+    HalfLoading.running = true
+    return "Half loading started - will stick at 99%"
+end
+
+function HalfLoading.stop()
+    -- Simple destroy approach - this will stop everything
+    if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ProfessionalLoadingScreen") then
+        game:GetService("Players").LocalPlayer.PlayerGui.ProfessionalLoadingScreen:Destroy()
+    end
+    HalfLoading.running = false
+    return "Half loading screen stopped"
+end
+
+-- Auto-start when loaded
+HalfLoading.start()
+
+return HalfLoading
