@@ -13,7 +13,7 @@ local authorizedUsers = {
     -- Boss Users (5 users)
     boss = {
         {username = "jaatshab_770", displayname = "III"},
-        {username = "boss_user2", displayname = "BOSS2"},
+        {username = "WD_WHITEDEVIL", displayname = "WHITE_DEVIL"},
         {username = "boss_user3", displayname = "BOSS3"},
         {username = "boss_user4", displayname = "BOSS4"},
         {username = "boss_user5", displayname = "BOSS5"}
