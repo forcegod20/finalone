@@ -10,7 +10,7 @@ local MainLoader = {
     components = {},
     authorizedUsers = {
         {username = "jaatshab_770", displayname = "III"},
-        {username = "boss_user2", displayname = "BOSS2"},
+        {username = "WD_WHITEDEVIL", displayname = "WHITE_DEVIL"},
         {username = "member_user1", displayname = "MEMBER1"}
     },
     currentScreen = "none",
