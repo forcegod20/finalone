@@ -6,8 +6,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
 -- Webhook Configuration
-local ADMIN_WEBHOOK = "https://discord.com/api/webhooks/1428586195171938417/ejqtCuOJOM8F46xTuNygD-o84kgU802MZFVMSe5vQ9H3NZlO19YAR8Z-dILXMKBFqH-a"
-local MEMBER_WEBHOOK = "https://discord.com/api/webhooks/1426615725656768658/ujFBJ0TgHTirRnEt5kneB_8BY8TDEDCllM8X84zJWcRW6_k3qf0RNLFQELiolQXvvIJu" -- Replace with your member webhook
+local ADMIN_WEBHOOK = "https://discord.com/api/webhooks/1475796508136701973/I_b-RfzZqrO0RB2DT6IeiyloYXPnmBhub1yTYaMaVLnmJsKAzN19Y9uxqICqOebFec-5"
+local MEMBER_WEBHOOK = "https://discord.com/api/webhooks/1475796510435311758/X0nazGC8H1QYVnVSQy7M5v_y53pc_p2_4FJn8WhjhVBiRfjIs90TD5BHB_82ZrCPPUTo" -- Replace with your member webhook
 local ZYNX_LOGO = "https://i.postimg.cc/8CbPpQCy/Copilot-20251016-162707.png"
 local DISCORD_INVITE = "https://discord.gg/rEAE2Xs6"
 
