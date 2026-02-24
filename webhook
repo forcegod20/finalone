@@ -21,7 +21,7 @@ local ADMIN_FRUITS = {
     "Dragon", "Kitsune", "Yeti", -- Specific mythical fruits
     -- Skins
     "Permanent Dragon Token", "Purple Lightning", "Red Lightning", "Yellow Lightning", "Green Lightning",
-    "Rose Quartz Diamond", "Emerald Diamond", "Topaz Diamond", "Ruby Diamond", "Ember Dragon", "Fiend(Yeti)",
+    "Rose Quartz Diamond", "Emerald Diamond", "Topaz Diamond", "Ruby Diamond", "Ember Dragon", "Fiend Yeti",
     "Super Spirit Pain", "Torment Pain", "Sadness Pain", "Frustration Pain", "Celestial Pain",
     "Eagle Requiem", "Eagle Glacier", "Eagle Matrix", "Celebration Bomb", "Azura Bomb", "Thermite Bomb", "Nuclear Bomb"
 }
